@@ -4,8 +4,25 @@ import { usePathname, useParams as useNextParams, useRouter as useNextRouter, us
 import NextLink from "next/link";
 import { useCallback } from "react";
 
-export function Link({ to, href, children, ...props }: any) {
-  return <NextLink href={href ?? to} {...props}>{children}</NextLink>;
+function resolvePath(to: string, params?: Record<string, string | number>) {
+  let path = to;
+  for (const [key, value] of Object.entries(params ?? {})) {
+    path = path.replace(`$${key}`, encodeURIComponent(String(value)));
+    path = path.replace(`[${key}]`, encodeURIComponent(String(value)));
+  }
+  return path;
+}
+
+export function Link({ to, href, params, search, children, ...props }: any) {
+  let target = href ?? to ?? "/";
+  if (typeof target === "string") target = resolvePath(target, params);
+  if (search && typeof target === "string") {
+    const query = new URLSearchParams();
+    for (const [key, value] of Object.entries(search)) if (value != null) query.set(key, String(value));
+    const encoded = query.toString();
+    if (encoded) target += target.includes("?") ? `&${encoded}` : `?${encoded}`;
+  }
+  return <NextLink href={target} {...props}>{children}</NextLink>;
 }
 
 export function useNavigate() {
