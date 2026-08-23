@@ -17,6 +17,7 @@ export type DeliveryStatus =
   | "OUT_FOR_DELIVERY"
   | "DELIVERED"
   | "REJECTED"
+  | "EXPIRED"
   | "FAILED"
   | "CANCELLED";
 
@@ -33,13 +34,14 @@ export const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
   OUT_FOR_DELIVERY: "Out for Delivery",
   DELIVERED: "Delivered",
   REJECTED: "Rejected",
+  EXPIRED: "Expired — not accepted in time",
   FAILED: "Failed",
   CANCELLED: "Cancelled",
 };
 
 export const DELIVERY_FLOW: DeliveryStatus[] = ["ASSIGNED", "ACCEPTED", "PICKED_UP", "OUT_FOR_DELIVERY", "DELIVERED"];
 export const ACTIVE_STATUSES: DeliveryStatus[] = ["PENDING", "ASSIGNED", "ACCEPTED", "PICKED_UP", "OUT_FOR_DELIVERY"];
-export const CLOSED_STATUSES: DeliveryStatus[] = ["REJECTED", "FAILED", "CANCELLED"];
+export const CLOSED_STATUSES: DeliveryStatus[] = ["REJECTED", "EXPIRED", "FAILED", "CANCELLED"];
 
 export function nextRiderStatus(status: DeliveryStatus): RiderDeliveryStatus | null {
   switch (status) {
@@ -136,6 +138,7 @@ export interface Delivery {
   riderStatus?: string | null;
   assignedAt?: string | null;
   acceptedAt?: string | null;
+  acceptanceDeadlineAt?: string | null;
   pickedUpAt?: string | null;
   deliveredAt?: string | null;
   rejectedAt?: string | null;

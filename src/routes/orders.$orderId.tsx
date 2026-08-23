@@ -16,8 +16,9 @@ import {
   PenLine,
   XCircle,
   Loader2,
+  Timer,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { AppLayout, PageHeader, RequireAuth } from "@/components/app-shell";
 import { Card, Skeleton, EmptyState } from "@/components/ui-bits";
@@ -33,6 +34,7 @@ import {
 import { useAuth } from "@/lib/app-state";
 import { useRealtime } from "@/lib/realtime";
 import { LiveDeliveryMap } from "@/components/LiveDeliveryMap";
+import { cn } from "@/lib/utils";
 import {
   DELIVERY_STATUS_LABEL,
   formatAddress,
@@ -135,6 +137,33 @@ function OrderDetail({ delivery }: { delivery: Delivery }) {
   const otpVerified = Boolean(delivery.deliveryOtpVerified);
   const customerConfirmed = Boolean(delivery.customerConfirmedAt);
   const canCompleteVerified = !proofRequired || (otpVerified && customerConfirmed);
+  const [acceptanceRemaining, setAcceptanceRemaining] = useState(
+    () => delivery.acceptanceDeadlineAt
+      ? Math.max(0, new Date(delivery.acceptanceDeadlineAt).getTime() - Date.now())
+      : 0,
+  );
+
+  useEffect(() => {
+    if (!delivery.acceptanceDeadlineAt || status !== "ASSIGNED") {
+      setAcceptanceRemaining(0);
+      return;
+    }
+
+    const tick = () => {
+      setAcceptanceRemaining(
+        Math.max(
+          0,
+          new Date(delivery.acceptanceDeadlineAt!).getTime() - Date.now(),
+        ),
+      );
+    };
+
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [delivery.acceptanceDeadlineAt, status]);
+
+  const acceptanceSeconds = Math.ceil(acceptanceRemaining / 1000);
 
   const run = (to: RiderDeliveryStatus) => {
     mutation.mutate(to, {
@@ -183,6 +212,17 @@ function OrderDetail({ delivery }: { delivery: Delivery }) {
       <div className="px-4 py-4 space-y-4 pb-32">
         {/* Earnings hero */}
         <div className="rounded-2xl gradient-primary text-primary-foreground p-5 shadow-elevated animate-slide-up">
+          {status === "ASSIGNED" && delivery.acceptanceDeadlineAt && (
+            <div className="mb-4 flex items-center justify-between rounded-xl bg-black/10 px-3 py-2">
+              <div className="flex items-center gap-2 text-xs font-semibold">
+                <Timer className="h-4 w-4" />
+                Accept this delivery within
+              </div>
+              <div className={cn("text-lg font-black tabular-nums", acceptanceSeconds <= 15 ? "text-red-100" : "")}>
+                {acceptanceRemaining > 0 ? `${acceptanceSeconds}s` : "Expired"}
+              </div>
+            </div>
+          )}
           <div className="text-xs uppercase tracking-widest opacity-80">You'll earn</div>
           <div className="text-3xl font-bold mt-1">{formatMoney(getEarning(delivery))}</div>
           <div className="mt-3 flex gap-4 text-xs">

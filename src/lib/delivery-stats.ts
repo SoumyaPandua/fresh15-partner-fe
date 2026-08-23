@@ -37,7 +37,7 @@ export function computeStats(deliveries: Delivery[], now = new Date()): Delivery
   }
 
   const decided = deliveries.filter(d => d.status !== "PENDING" && d.status !== "ASSIGNED");
-  const rejected = deliveries.filter(d => d.status === "REJECTED").length;
+  const rejected = deliveries.filter(d => d.status === "REJECTED" || d.status === "EXPIRED").length;
   const acceptanceRate = decided.length > 0 ? Math.round(((decided.length - rejected) / decided.length) * 100) : null;
 
   // Last 7 days including today.

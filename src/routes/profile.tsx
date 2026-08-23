@@ -2,7 +2,7 @@
 
 import { createFileRoute, Link, useNavigate } from "@/lib/next-router-compat";
 import { useRef, useState } from "react";
-import { FileText, Bike, Landmark, Settings as SettingsIcon, HelpCircle, LogOut, ChevronRight, Star, Package, Award, Camera, Loader2, Pencil, KeyRound } from "lucide-react";
+import { FileText, Bike, Landmark, Settings as SettingsIcon, HelpCircle, LogOut, ChevronRight, Star, Package, Award, Camera, Loader2, Pencil, KeyRound, CalendarClock, Wallet, ShieldAlert } from "lucide-react";
 import { AppLayout, TopBar, RequireAuth } from "@/components/app-shell";
 import { Card, Skeleton, Toggle } from "@/components/ui-bits";
 import { PARTNER_PROFILE } from "@/lib/demo-data";
@@ -119,6 +119,9 @@ function Profile() {
         </div>
 
         <div className="rounded-2xl bg-card border border-border/60 shadow-card overflow-hidden divide-y divide-border/60">
+          <RowLink to="/schedule" icon={<CalendarClock className="h-4.5 w-4.5" />} title="My shifts" subtitle="Schedule your delivery hours" />
+          <RowLink to="/cash" icon={<Wallet className="h-4.5 w-4.5" />} title="Cash in hand" subtitle="COD reconciliation" />
+          <RowLink to="/incidents" icon={<ShieldAlert className="h-4.5 w-4.5" />} title="Report incident" subtitle="Safety, customer or app issue" />
           <RowLink to="/change-password" icon={<KeyRound className="h-4.5 w-4.5" />} title="Change password" />
           <RowLink to="/settings" icon={<SettingsIcon className="h-4.5 w-4.5" />} title="Settings" />
           <RowLink to="/support" icon={<HelpCircle className="h-4.5 w-4.5" />} title="Help & support" />

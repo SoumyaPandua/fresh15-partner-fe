@@ -29,9 +29,9 @@ export function useMyDeliveries() {
     queryKey: deliveryKeys.my(),
     enabled: !!token,
     queryFn: () => fetchMyDeliveries(token!),
-    refetchInterval: false,
+    refetchInterval: 5_000,
     refetchIntervalInBackground: false,
-    staleTime: 10_000,
+    staleTime: 2_000,
     retry: (count, err) => !(err instanceof ApiError && [401, 403].includes(err.status)) && count < 2,
   });
 }
@@ -42,9 +42,9 @@ export function useDelivery(id: string) {
     queryKey: deliveryKeys.detail(id),
     enabled: !!token && !!id,
     queryFn: () => fetchDelivery(token!, id),
-    refetchInterval: false,
+    refetchInterval: 3_000,
     refetchIntervalInBackground: false,
-    staleTime: 5_000,
+    staleTime: 1_000,
     retry: (count, err) => !(err instanceof ApiError && [401, 403, 404].includes(err.status)) && count < 2,
   });
 }
