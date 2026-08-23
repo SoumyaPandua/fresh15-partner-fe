@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AppLayout, TopBar, RequireAuth } from "@/components/app-shell";
 import { Card, SectionTitle, Skeleton, EmptyState } from "@/components/ui-bits";
 import { useAuth } from "@/lib/app-state";
-import { getPartnerEarnings } from "@/lib/partner-ops-api";
+import { getPartnerEarnings, type EarningsLedgerEntry } from "@/lib/partner-ops-api";
 import { formatDateTime, formatMoney } from "@/lib/delivery-api";
 import { cn } from "@/lib/utils";
 
@@ -123,7 +123,7 @@ function Wallet() {
   );
 }
 
-function Ledger({ items }: { items: typeof import("@/lib/partner-ops-api").EarningsLedgerEntry[] }) {
+function Ledger({ items }: { items: EarningsLedgerEntry[] }) {
   if (!items.length) return <Card className="py-8 text-center text-sm text-muted-foreground">No entries yet.</Card>;
 
   return (

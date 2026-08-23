@@ -21,6 +21,10 @@ const STATUS_COLORS: Record<DeliveryStatus, string> = {
   OUT_FOR_DELIVERY: "bg-accent/20 text-accent-foreground border-accent/40",
   DELIVERED: "bg-success/15 text-success border-success/30",
   REJECTED: "bg-destructive/15 text-destructive border-destructive/30",
+
+  // Required because DeliveryStatus now supports assignment timeout.
+  EXPIRED: "bg-warning/20 text-warning-foreground border-warning/40",
+
   FAILED: "bg-destructive/15 text-destructive border-destructive/30",
   CANCELLED: "bg-destructive/15 text-destructive border-destructive/30",
 };
