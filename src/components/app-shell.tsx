@@ -3,6 +3,7 @@ import { Home, Package, Wallet, TrendingUp, User, ArrowLeft, Bell, Moon, Sun } f
 import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth, useTheme } from "@/lib/app-state";
+import { Fresh15AiAssistant } from "@/components/common/Fresh15AiAssistant";
 import { useUnreadCount } from "@/lib/notification-queries";
 
 const TABS = [
@@ -131,6 +132,7 @@ export function AppLayout({ children, showNav = true }: { children: ReactNode; s
         {children}
       </div>
       {showNav && <BottomNav />}
+      <Fresh15AiAssistant />
     </div>
   );
 }

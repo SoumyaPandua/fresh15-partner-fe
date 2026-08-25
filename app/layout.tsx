@@ -5,7 +5,7 @@ import Providers from "./providers";
 export const metadata: Metadata = {
   title: "Fresh15 Partner — Deliver Fresh, Earn More",
   description: "The Fresh15 Delivery Partner app — accept orders, track earnings, and grow with India's fastest grocery network.",
-  icons: { icon: "/favicon.ico" },
+  icons: { icon: "/icon.svg" },
   openGraph: {
     title: "Fresh15 Partner — Deliver Fresh, Earn More",
     description: "The Fresh15 Delivery Partner app — accept orders, track earnings, and grow with India's fastest grocery network.",
