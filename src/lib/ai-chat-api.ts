@@ -22,12 +22,12 @@ export type AiChatResponse = {
   blocked: boolean;
 };
 
-export function sendAiMessage(
+export async function sendAiMessage(
   token: string,
   message: string,
   conversationId?: string,
-) {
-  return apiRequest<AiChatResponse>(
+): Promise<AiChatResponse> {
+  const response = await apiRequest<AiChatResponse>(
     "/api/ai/chat",
     {
       method: "POST",
@@ -38,10 +38,12 @@ export function sendAiMessage(
     },
     token,
   );
+
+  return response.data;
 }
 
-export function getAiConversations(token: string) {
-  return apiRequest<
+export async function getAiConversations(token: string) {
+  const response = await apiRequest<
     Array<
       Pick<
         AiConversation,
@@ -55,14 +57,21 @@ export function getAiConversations(token: string) {
     },
     token,
   );
+
+  return response.data;
 }
 
-export function getAiConversation(token: string, id: string) {
-  return apiRequest<AiConversation>(
+export async function getAiConversation(
+  token: string,
+  id: string,
+): Promise<AiConversation> {
+  const response = await apiRequest<AiConversation>(
     `/api/ai/conversations/${encodeURIComponent(id)}`,
     {
       method: "GET",
     },
     token,
   );
+
+  return response.data;
 }
