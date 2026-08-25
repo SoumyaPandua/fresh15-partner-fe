@@ -1,48 +1,68 @@
-import { API_BASE } from "./api-client";
+import { apiRequest } from "./api-client";
 
 export type AiMessage = {
   role: "user" | "assistant";
   content: string;
+  blocked?: boolean;
+  createdAt?: string;
+};
+
+export type AiConversation = {
+  _id: string;
+  title: string;
+  messages: AiMessage[];
+  messageCount: number;
+  lastActivityAt: string;
+  createdAt: string;
 };
 
 export type AiChatResponse = {
+  conversationId: string;
   reply: string;
-  conversationId?: string;
+  blocked: boolean;
 };
 
-export async function sendAiMessage(
+export function sendAiMessage(
   token: string,
-  messages: AiMessage[],
-): Promise<AiChatResponse> {
-  const response = await fetch(`${API_BASE}/api/ai/chat`, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  message: string,
+  conversationId?: string,
+) {
+  return apiRequest<AiChatResponse>(
+    "/api/ai/chat",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        message,
+        conversationId,
+      }),
     },
-    body: JSON.stringify({ messages }),
-    cache: "no-store",
-  });
+    token,
+  );
+}
 
-  let payload: any = null;
+export function getAiConversations(token: string) {
+  return apiRequest<
+    Array<
+      Pick<
+        AiConversation,
+        "_id" | "title" | "messageCount" | "lastActivityAt" | "createdAt"
+      >
+    >
+  >(
+    "/api/ai/conversations",
+    {
+      method: "GET",
+    },
+    token,
+  );
+}
 
-  try {
-    payload = await response.json();
-  } catch {
-    payload = null;
-  }
-
-  if (!response.ok || payload?.success === false) {
-    throw new Error(
-      payload?.message || `AI request failed (${response.status})`,
-    );
-  }
-
-  const data = payload?.data ?? payload;
-
-  return {
-    reply: String(data?.reply ?? data?.message ?? ""),
-    conversationId: data?.conversationId,
-  };
+export function getAiConversation(token: string, id: string) {
+  return apiRequest<AiConversation>(
+    `/api/ai/conversations/${encodeURIComponent(id)}`,
+    {
+      method: "GET",
+    },
+    token,
+  );
 }
