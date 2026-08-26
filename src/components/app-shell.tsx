@@ -4,6 +4,7 @@ import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth, useTheme } from "@/lib/app-state";
 import { Fresh15AiAssistant } from "@/components/common/Fresh15AiAssistant";
+import { Fresh15AiAgent } from "@/components/common/Fresh15AiAgent";
 import { useUnreadCount } from "@/lib/notification-queries";
 
 const TABS = [
@@ -133,6 +134,7 @@ export function AppLayout({ children, showNav = true }: { children: ReactNode; s
       </div>
       {showNav && <BottomNav />}
       <Fresh15AiAssistant />
+      <Fresh15AiAgent />
     </div>
   );
 }
