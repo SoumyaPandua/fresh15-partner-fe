@@ -1,11 +1,86 @@
-import { API_BASE } from "./api-client";
+import { apiRequest } from "./api-client";
 
-export type AgentAction = { tool: string; success: boolean; result?: unknown; error?: string; code?: string };
-export type AgentResponse = { reply: string; actions: AgentAction[]; blocked: boolean };
+export type AgentAction = {
+  tool: string;
+  success: boolean;
+  result?: unknown;
+  error?: string;
+  code?: string;
+};
 
-export async function sendAiAgent(token: string, message: string) {
-  const response = await fetch(`${API_BASE}/api/ai/agent`, { method: "POST", headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ message }), cache: "no-store" });
-  const payload = await response.json().catch(() => null);
-  if (!response.ok || payload?.success === false) throw new Error(payload?.message || `AI agent failed (${response.status})`);
-  return payload.data as AgentResponse;
+export type AgentConfirmation = {
+  confirmationId: string;
+  action: string;
+  summary?: unknown;
+};
+
+export type AgentResponse = {
+  conversationId: string;
+  reply: string;
+  actions: AgentAction[];
+  blocked: boolean;
+  confirmation?: AgentConfirmation | null;
+};
+
+export type AgentConfirmResponse = {
+  reply: string;
+  action: string;
+  result?: unknown;
+  blocked: boolean;
+};
+
+export async function sendAiAgent(
+  token: string,
+  message: string,
+  conversationId?: string,
+): Promise<AgentResponse> {
+  const response = await apiRequest<AgentResponse>(
+    "/api/ai/agent",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        message,
+        conversationId,
+      }),
+    },
+    token,
+  );
+
+  return response.data;
+}
+
+export async function confirmAiAgent(
+  token: string,
+  conversationId: string,
+  confirmationId: string,
+): Promise<AgentConfirmResponse> {
+  const response = await apiRequest<AgentConfirmResponse>(
+    "/api/ai/agent/confirm",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        conversationId,
+        confirmationId,
+      }),
+    },
+    token,
+  );
+
+  return response.data;
+}
+
+export async function declineAiAgent(
+  token: string,
+  conversationId: string,
+  confirmationId: string,
+) {
+  const response = await apiRequest<{ reply: string; blocked: boolean }>(
+    "/api/ai/agent/decline",
+    {
+      method: "POST",
+      body: JSON.stringify({ conversationId, confirmationId }),
+    },
+    token,
+  );
+  return response.data;
 }
