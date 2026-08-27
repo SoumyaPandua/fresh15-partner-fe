@@ -1,48 +1,40 @@
-export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://fresh15-main.onrender.com").replace(/\/$/, "");
+import { API_BASE_URL } from "./auth";
 
-export class ApiError extends Error {
-  constructor(message: string, public readonly status = 0, public readonly details?: unknown) {
-    super(message);
-    this.name = "ApiError";
+const NO_STORE = [
+  "/api/cart",
+  "/api/checkout",
+  "/api/orders",
+  "/api/payments",
+  "/api/refunds",
+  "/api/deliveries",
+  "/api/notifications",
+  "/api/partner/queue",
+  "/api/partner/cash",
+];
+
+const shouldNoStore = (path: string, method: string) =>
+  method !== "GET" || NO_STORE.some((prefix) => path.startsWith(prefix));
+
+export async function request<T>(path: string, init: RequestInit = {}, token?: string | null): Promise<T> {
+  if (!token) throw new Error("Your session has expired. Please sign in again.");
+
+  const method = String(init.method || "GET").toUpperCase();
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...init,
+    cache: shouldNoStore(path, method) ? "no-store" : undefined,
+    headers: {
+      ...(init.headers || {}),
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  let json: any = null;
+  try { json = await response.json(); } catch { /* non-JSON */ }
+
+  if (!response.ok || json?.success === false) {
+    if (response.status === 401 && typeof window !== "undefined") window.dispatchEvent(new Event("f15-auth-expired"));
+    throw new Error(json?.message || `Request failed (${response.status})`);
   }
-}
 
-interface ApiEnvelope<T> {
-  success: boolean;
-  message?: string;
-  data: T;
-}
-
-export async function apiRequest<T>(path: string, init: RequestInit = {}, token?: string): Promise<ApiEnvelope<T>> {
-  const headers = new Headers(init.headers);
-  if (!headers.has("Accept")) headers.set("Accept", "application/json");
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-  if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-
-  let response: Response;
-  try {
-    response = await fetch(`${API_BASE}${path}`, { ...init, headers, cache: "no-store" });
-  } catch (error) {
-    throw new ApiError("Network error. Please check your connection and try again.", 0, error);
-  }
-
-  let payload: ApiEnvelope<T> | null = null;
-  const contentType = response.headers.get("content-type") ?? "";
-  try {
-    payload = contentType.includes("application/json") ? await response.json() as ApiEnvelope<T> : null;
-  } catch {
-    payload = null;
-  }
-
-  if (!response.ok || !payload?.success) {
-    const message = payload?.message || (response.status === 401 ? "Your session has expired. Please sign in again." : response.status === 403 ? "You do not have permission to perform this action." : response.status === 404 ? "The requested resource was not found." : "Something went wrong. Please try again.");
-    throw new ApiError(message, response.status, payload);
-  }
-  return payload;
-}
-
-export function apiHeaders(extra?: HeadersInit) {
-  const headers = new Headers(extra);
-  headers.set("Accept", "application/json");
-  return headers;
+  return json?.data as T;
 }
