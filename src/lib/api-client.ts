@@ -1,6 +1,6 @@
-import { API_BASE_URL } from "./auth";
-
-export const API_BASE = API_BASE_URL.replace(/\/$/, "");
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://fresh15-main.onrender.com";
 
 export class ApiError extends Error {
   constructor(
@@ -32,7 +32,8 @@ const NO_STORE = [
 ];
 
 const shouldNoStore = (path: string, method: string) =>
-  method !== "GET" || NO_STORE.some((prefix) => path.startsWith(prefix));
+  method !== "GET" ||
+  NO_STORE.some((prefix) => path.startsWith(prefix));
 
 export async function apiRequest<T>(
   path: string,
@@ -69,7 +70,9 @@ export async function apiRequest<T>(
   try {
     response = await fetch(`${API_BASE}${path}`, {
       ...init,
-      cache: shouldNoStore(path, method) ? "no-store" : undefined,
+      cache: shouldNoStore(path, method)
+        ? "no-store"
+        : undefined,
       headers,
     });
   } catch (error) {
@@ -89,8 +92,13 @@ export async function apiRequest<T>(
   }
 
   if (!response.ok || json?.success === false) {
-    if (response.status === 401 && typeof window !== "undefined") {
-      window.dispatchEvent(new Event("f15-auth-expired"));
+    if (
+      response.status === 401 &&
+      typeof window !== "undefined"
+    ) {
+      window.dispatchEvent(
+        new Event("f15-auth-expired"),
+      );
     }
 
     throw new ApiError(
@@ -116,6 +124,13 @@ export async function request<T>(
   init: RequestInit = {},
   token?: string | null,
 ): Promise<T> {
-  const response = await apiRequest<T>(path, init, token);
+  const response = await apiRequest<T>(
+    path,
+    init,
+    token,
+  );
+
   return response.data;
 }
+
+export { API_BASE };
