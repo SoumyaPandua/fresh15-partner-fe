@@ -134,7 +134,7 @@ export function AppLayout({ children, showNav = true }: { children: ReactNode; s
       </div>
       {showNav && <BottomNav />}
       <Fresh15AiAssistant />
-      <Fresh15AiAgent />
+      {/* <Fresh15AiAgent /> */}
     </div>
   );
 }
